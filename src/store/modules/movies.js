@@ -1,13 +1,14 @@
-import moviesList from '../../assets/movie-list';
+import moviesAPI from '../../services/moviesApi';
 
 const SET_SEARCH = 'SET_SEARCH';
 const SET_FILTER = 'SET_FILTER';
 const ADD_MOVIE = 'ADD_MOVIE';
 const DELETE_MOVIE = 'DELETE_MOVIE';
 const UPDATE_MOVIE = 'UPDATE_MOVIE';
+const SET_MOVIES = 'SET_MOVIES';
 
 const state = {
-    movies: moviesList,
+    movies: [],
     search: '',
     filter: {
         key: 'rating',
@@ -33,6 +34,9 @@ const mutations = {
         state.movies = state.movies.filter(movie =>
             movie.id === movieUpdated.id ? movieUpdated : movie
         );
+    },
+    [SET_MOVIES](state, movies) {
+        state.movies = movies;
     }
 };
 
@@ -44,13 +48,31 @@ const actions = {
         commit(SET_FILTER, filter);
     },
     addMovie({ commit }, newMovie) {
-        commit(ADD_MOVIE, newMovie);
+        moviesAPI
+            .addMovie(newMovie)
+            .then(res => commit(ADD_MOVIE, res))
+            .catch(error => console.log(error));
     },
     deleteMovie({ commit }, movieID) {
-        commit(DELETE_MOVIE, movieID);
+        moviesAPI
+            .deleteMovie(movieID)
+            .then(res => commit(DELETE_MOVIE, res))
+            .catch(err => console.log(err));
     },
     updateMovie({ commit }, movie) {
-        commit(UPDATE_MOVIE, movie);
+        moviesAPI
+            .updateMovie(movie)
+            .then(res => {
+                commit(UPDATE_MOVIE, res);
+                return;
+            })
+            .catch(error => console.log(error));
+    },
+    fetchMovies({ commit }) {
+        moviesAPI
+            .getMovies()
+            .then(res => commit(SET_MOVIES, res))
+            .catch(error => console.log(error));
     }
 };
 

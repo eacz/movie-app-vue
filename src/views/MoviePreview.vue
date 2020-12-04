@@ -1,8 +1,9 @@
 <template>
     <div id="movie-preview">
         <Navbar />
+        
         <div id="movie-container">
-            <div id="movie-poster">
+            <div id="movie-poster"><Spinner v-if="Object.keys(movie).length < 1" />
                 <img :src="movie.poster" alt="movie poster" />
             </div>
 
@@ -129,12 +130,15 @@
 import Navbar from '../components/Navbar';
 import Modal from '../components/Modal';
 import ratingMixin from '../mixins/getRatingColor';
+import Spinner from '@/components/Spinner'
+
+import moviesAPI from '../services/moviesApi';
 export default {
-    components: { Navbar, Modal },
+    components: { Navbar, Modal, Spinner },
     mixins: [ratingMixin],
     props: {
         id: {
-            type: Number,
+            type: [String, Number],
             default: null
         }
     },
@@ -146,16 +150,25 @@ export default {
     },
     methods: {
         deleteMovie() {
-            this.$store.dispatch('deleteMovie', parseInt(this.id));
-            this.$router.push('/');
+            this.$store
+                .dispatch('deleteMovie', this.id)
+                .then(res => this.$router.push('/'));x
         },
         updateMovie() {
-            this.$store.dispatch('updateMovie', this.movie)
+            this.$store.dispatch('updateMovie', this.movie);
             this.showModal = false;
         }
     },
     created() {
-        this.movie = this.$store.getters.getMovieById(parseInt(this.id));
+        const movie = this.$store.getters.getMovieById(parseInt(this.id));
+        if (movie) {
+            this.movie = movie;
+        } else {
+            moviesAPI
+                .getMovieByID(this.id)
+                .then(res => (this.movie = res))
+                .catch(error => console.log(error));
+        }
     }
 };
 </script>

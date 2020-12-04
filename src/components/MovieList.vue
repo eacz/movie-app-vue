@@ -1,13 +1,15 @@
 <template>
     <div id="movie-container">
         <Movie v-for="movie in movies" :key="movie.id" :movie="movie" />
+        <Spinner v-if="movies.length < 1" />
     </div>
 </template>
 
 <script>
+import Spinner from './Spinner';
 import Movie from './Movie';
 export default {
-    components: { Movie },
+    components: { Movie, Spinner },
     data() {
         return {
             //movies: []
@@ -18,9 +20,9 @@ export default {
 			return this.$store.getters.getMovies;
 		}
 	},
-    /*created() {
-        this.movies = this.$store.getters.getMovies;
-    } */
+    created() {
+        this.$store.dispatch('fetchMovies');
+    }
 };
 </script>
 
